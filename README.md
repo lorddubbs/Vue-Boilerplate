@@ -1,4 +1,4 @@
-# groupfarma
+# Vue Boilerplate
 
 ## Project setup
 ```
