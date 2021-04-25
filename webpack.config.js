@@ -2,10 +2,21 @@ const { VueLoaderPlugin } = require("vue-loader");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin  = require('mini-css-extract-plugin');
+const webpack = require('webpack')
 const path = require('path');
 
 module.exports = {
   mode: "development",
+  devtool: "source-map",
+  // Spin up a server for quick development
+  devServer: {
+    historyApiFallback: true,
+    contentBase: path.resolve(__dirname, './dist'),
+    open: true,
+    compress: true,
+    hot: true,
+    port: 8080,
+  },
   entry: {
     main: path.resolve(__dirname, "./src/main.js"),
   },
@@ -24,23 +35,53 @@ module.exports = {
         test: /\.vue$/,
         loader: "vue-loader",
       },
-      {
-        test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              name: "[name].[ext]",
-              outputPath: "img/",
-            }
-          },
-        ],
-       type: 'javascript/auto'
+     {
+       test: /\.(woff|woff2|eot|ttf|svg)(\?.*$|$)/,
+       use: [
+         {
+         loader: 'file-loader',
+         options: {
+         name: "[name].[ext]",
+         outputPath: "fonts/",
+         esModule: false
+         }
+        }
+       ]
      },
+     {
+       test: /\.(?:ico|gif|png|jpg|jpeg)$/i,
+       use: [
+         {
+           loader: 'file-loader',
+           options: {
+             name: "[name].[ext]",
+             outputPath: "img/",
+             esModule: false
+           }
+         },
+       ],
+      type: 'javascript/auto'
+    },
       {
         test: /\.(sass|scss|css)$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader', 'postcss-loader', 'sass-loader'],
-      },
+        use: [
+          MiniCssExtractPlugin.loader,
+          {
+            loader: "css-loader",
+            options: {
+              sourceMap: true,
+            },
+          },
+          'postcss-loader',
+          'resolve-url-loader',
+          {
+            loader: "sass-loader",
+            options: {
+              sourceMap: true,
+            },
+          },
+        ],
+      }
     ],
   },
   plugins: [
@@ -49,12 +90,15 @@ module.exports = {
     new MiniCssExtractPlugin({
       filename: 'css/main.css'
     }),
+    new webpack.DefinePlugin({
+      'process.env.BASE_URL': JSON.stringify('http://localhost:8080')
+    }),
     new HtmlWebpackPlugin({
       title: "Groupfarma",
-      template: path.resolve(__dirname, "public", "index.html"), // template file
-      filename: "index.html", // output file
+      template: path.resolve(__dirname, "public", "index.html"),
       favicon: "./public/favicon.ico"
     }),
+    new webpack.HotModuleReplacementPlugin(),
   ],
   resolve: {
     alias: {
