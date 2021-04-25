@@ -22,7 +22,7 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, "./dist"),
-    filename: "[name].bundle.js",
+    filename: "[name].[contenthash:8].bundle.js",
   },
   module: {
     rules: [
@@ -41,7 +41,7 @@ module.exports = {
          {
          loader: 'file-loader',
          options: {
-         name: "[name].[ext]",
+         name: "[name].[contenthash:8].[ext]",
          outputPath: "fonts/",
          esModule: false
          }
@@ -54,7 +54,7 @@ module.exports = {
          {
            loader: 'file-loader',
            options: {
-             name: "[name].[ext]",
+             name: "[name].[contenthash:8].[ext]",
              outputPath: "img/",
              esModule: false
            }
@@ -88,7 +88,7 @@ module.exports = {
     new VueLoaderPlugin(),
     new CleanWebpackPlugin(),
     new MiniCssExtractPlugin({
-      filename: 'css/main.css'
+      filename: 'css/[name].[contenthash:8].css'
     }),
     new webpack.DefinePlugin({
       'process.env.BASE_URL': JSON.stringify('http://localhost:8080')
@@ -105,5 +105,19 @@ module.exports = {
       vue$: "vue/dist/vue.runtime.esm.js",
     },
     extensions: ["*", ".js", ".vue", ".json"],
+  },
+  optimization: {
+    moduleIds: "deterministic",
+    runtimeChunk: "single",
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: "vendors",
+          priority: -10,
+          chunks: "all",
+        },
+      },
+    },
   },
 }
